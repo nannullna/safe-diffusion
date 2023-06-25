@@ -24,7 +24,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
-  <title>Academic Project Page</title>
+  <title>Safe self-Diffusion Distillation</title>
   <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
   rel="stylesheet">
@@ -52,37 +52,44 @@
       <div class="container is-max-desktop">
         <div class="columns is-centered">
           <div class="column has-text-centered">
-            <h1 class="title is-1 publication-title">Academic Project Page</h1>
+            <h1 class="title is-1 publication-title">Towards Safe Self-Distillation of Internet-Scale Text-to-Image Diffusion Models</h1>
             <div class="is-size-5 publication-authors">
               <!-- Paper authors -->
               <span class="author-block">
-                <a href="FIRST AUTHOR PERSONAL LINK" target="_blank">First Author</a><sup>*</sup>,</span>
-                <span class="author-block">
-                  <a href="SECOND AUTHOR PERSONAL LINK" target="_blank">Second Author</a><sup>*</sup>,</span>
-                  <span class="author-block">
-                    <a href="THIRD AUTHOR PERSONAL LINK" target="_blank">Third Author</a>
+                <a href="https://github.com/nannullna" target="_blank">Sanghyun Kim</a>,</span>
+              <span class="author-block">
+                <a href="https://github.com/ciao-seohyeon" target="_blank">Seohyeon Jung</a>,</span>
+                <!-- <sup>*</sup> indicates equal contribution -->
+              <span class="author-block">
+                <a href="https://github.com/balhaekim" target="_blank">Balhae Kim</a>,</span>
+              <span class="author-block">
+                <a href="https://github.com/moon4sake" target="_blank">Moonseok Choi</a>,</span>
+              <span class="author-block">
+                <a href="https://alinlab.kaist.ac.kr/shin.html" target="_blank">Jinwoo Shin</a>,</span>
+              <span class="author-block">
+                <a href="https://juho-lee.github.io/" target="_blank">Juho Lee</a>
+              </span>
+            </div>
+
+            <div class="is-size-5 publication-authors">
+              <span class="author-block">KAIST, Republic of Korea<br>ICML 2023 - Challenges in Deployable Generative AI Workshop</span>
+              <!-- <span class="eql-cntrb"><small><br><sup>*</sup>Indicates Equal Contribution</small></span> -->
+            </div>
+
+            <div class="column has-text-centered">
+              <div class="publication-links">
+                    <!-- Arxiv PDF link -->
+                <span class="link-block">
+                  <a href="https://arxiv.org/pdf/<ARXIV PAPER ID>.pdf" target="_blank"
+                  class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fas fa-file-pdf"></i>
                   </span>
-                  </div>
+                  <span>Paper</span>
+                  </a>
+                </span>
 
-                  <div class="is-size-5 publication-authors">
-                    <span class="author-block">Institution Name<br>Conferance name and year</span>
-                    <span class="eql-cntrb"><small><br><sup>*</sup>Indicates Equal Contribution</small></span>
-                  </div>
-
-                  <div class="column has-text-centered">
-                    <div class="publication-links">
-                         <!-- Arxiv PDF link -->
-                      <span class="link-block">
-                        <a href="https://arxiv.org/pdf/<ARXIV PAPER ID>.pdf" target="_blank"
-                        class="external-link button is-normal is-rounded is-dark">
-                        <span class="icon">
-                          <i class="fas fa-file-pdf"></i>
-                        </span>
-                        <span>Paper</span>
-                      </a>
-                    </span>
-
-                    <!-- Supplementary PDF link -->
+                    <!-- Supplementary PDF link
                     <span class="link-block">
                       <a href="static/pdfs/supplementary_material.pdf" target="_blank"
                       class="external-link button is-normal is-rounded is-dark">
@@ -92,15 +99,16 @@
                       <span>Supplementary</span>
                     </a>
                   </span>
+                   -->
 
                   <!-- Github link -->
-                  <span class="link-block">
-                    <a href="https://github.com/YOUR REPO HERE" target="_blank"
-                    class="external-link button is-normal is-rounded is-dark">
-                    <span class="icon">
-                      <i class="fab fa-github"></i>
-                    </span>
-                    <span>Code</span>
+                <span class="link-block">
+                  <a href="https://github.com/nannullna/safe-diffusion" target="_blank"
+                  class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
                   </a>
                 </span>
 
@@ -112,15 +120,15 @@
                     <i class="ai ai-arxiv"></i>
                   </span>
                   <span>arXiv</span>
-                </a>
-              </span>
+                  </a>
+                </span>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
+  </section>
 
 
 <!-- Teaser video-->
@@ -133,7 +141,7 @@
         type="video/mp4">
       </video>
       <h2 class="subtitle has-text-centered">
-        Aliquam vitae elit ullamcorper tellus egestas pellentesque. Ut lacus tellus, maximus vel lectus at, placerat pretium mi. Maecenas dignissim tincidunt vestibulum. Sed consequat hendrerit nisl ut maximus. 
+        Progression of removal on the generated image with the same initial latent code. 
       </h2>
     </div>
   </div>
@@ -148,7 +156,17 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Proin ullamcorper tellus sed ante aliquam tempus. Etiam porttitor urna feugiat nibh elementum, et tempor dolor mattis. Donec accumsan enim augue, a vulputate nisi sodales sit amet. Proin bibendum ex eget mauris cursus euismod nec et nibh. Maecenas ac gravida ante, nec cursus dui. Vivamus purus nibh, placerat ac purus eget, sagittis vestibulum metus. Sed vestibulum bibendum lectus gravida commodo. Pellentesque auctor leo vitae sagittis suscipit.
+            Large-scale image generation models, with impressive quality made possible by the vast amount of data available on the Internet, raise
+            social concerns that these models may generate harmful or copyrighted content. The biases
+            and harmfulness arise throughout the entire training process and are hard to completely remove,
+            which have become significant hurdles to the safe deployment of these models. In this paper, we
+            propose a method called SDD to prevent problematic content generation in text-to-image diffusion
+            models. We self-distill the diffusion model to guide the noise estimate conditioned on the target
+            removal concept to match the unconditional one.
+            Compared to the previous methods, our method eliminates a much greater proportion of harmful
+            content from the generated images without degrading the overall image quality. Furthermore,
+            our method allows the removal of multiple concepts at once, whereas previous works are limited
+            to removing a single concept at a time.
           </p>
         </div>
       </div>
@@ -278,7 +296,14 @@
   <section class="section" id="BibTeX">
     <div class="container is-max-desktop content">
       <h2 class="title">BibTeX</h2>
-      <pre><code>BibTex Code Here</code></pre>
+      <pre><code>@inproceedings{
+  kim2023sdd,
+  title={Towards Safe Self-Distillation of Internet-Scale Text-to-Image Diffusion Models},
+  author={Sanghyun Kim and Seohyeon Jung and Balhae Kim and Moonseok Choi and Jinwoo Shin and Juho Lee},
+  booktitle={ICML 2023 Workshop on Challenges in Deployable Generative AI},
+  year={2023},
+  url={https://openreview.net/forum?id=___}
+}</code></pre>
     </div>
 </section>
 <!--End BibTex citation -->
@@ -308,5 +333,5 @@
 
     <!-- End of Statcounter Code -->
 
-  </body>
-  </html>
+</body>
+</html>
