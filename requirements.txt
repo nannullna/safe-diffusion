@@ -1,0 +1,8 @@
+accelerate
+diffusers
+numpy
+Pillow
+tokenizers
+torch>=1.13
+tqdm
+transformers
