@@ -41,7 +41,7 @@ MAX_INFER_BATCH_SIZE = 1
 
 def parse_args() -> argparse.Namespace:
     
-    parser = argparse.ArgumentParser(description="Train a stable diffusion model.", prog="Train SDD")
+    parser = argparse.ArgumentParser(description="Train a stable diffusion model.", prog="Train ESD")
 
     parser.add_argument("--pretrained_model_name_or_path", type=str, required=True, 
         help="Path to pretrained model or model identifier from huggingface.co/models.")
@@ -60,8 +60,8 @@ def parse_args() -> argparse.Namespace:
     
     parser.add_argument("--guidance_scale", type=float, default=3.0,
         help="The scale of the CFG guidance for z_t.")
-    parser.add_argument("--concept_method", type=str, default="iterative",
-        choices=["composite", "random", "iterative", "sequential"])
+    parser.add_argument("--concept_scale", type=float, default=3.0,
+        help="The scale of the safety (negative) guidance for the target.")
     parser.add_argument("--finetuning_method", type=str, default="xattn",
         choices=["full", "selfattn", "xattn", "noxattn", "notime"])
 
@@ -71,7 +71,7 @@ def parse_args() -> argparse.Namespace:
         help="The directory where the logs will be written.")
     parser.add_argument("--image_dir", type=str, default="./images/",
         help="The directory where the images are stored. If not provided, do not save generated images.")
-    parser.add_argument("--exp_name", type=str, default="sdd")
+    parser.add_argument("--exp_name", type=str, default="esd")
 
     parser.add_argument("--log_every", type=int, default=100,
         help="Log the training loss every `--log_every` steps.")
@@ -83,9 +83,6 @@ def parse_args() -> argparse.Namespace:
         help="Evaluate the model after `--eval_after` steps.")
     parser.add_argument("--eval_at_first", action="store_true",
         help="Evaluate the model at the beginning.")
-    parser.add_argument("--eval_with", type=str, default="teacher", 
-        choices=["student", "teacher", "both"], 
-        help="The model to be evaluated. 'both' evaluates both models. 'teacher' evaluates the ema model.")
     parser.add_argument("--max_checkpoints", type=int, default=5,
         help="The maximum number of checkpoints to keep.")
     
@@ -95,7 +92,7 @@ def parse_args() -> argparse.Namespace:
         help="The resolution for input images.")
     parser.add_argument("--train_batch_size", type=int, default=1,
         help="Batch size per GPU/CPU for training.")
-    parser.add_argument("--num_train_steps", type=int, default=1500,
+    parser.add_argument("--num_train_steps", type=int, default=1000,
         help="The total number of training iterations to perform.")
     parser.add_argument("--num_ddpm_steps", type=int, default=1000,
         help="The total number of DDPM steps for training.")
@@ -505,7 +502,7 @@ def train_step(
 
     # Prepare latent codes to generate z_t
     latent_shape = (batch_size, unet_teacher.config.in_channels, 64, 64)
-    latents = torch.randn(latent_shape, generator=generator, device=devices[1])
+    latents = torch.randn(latent_shape, generator=generator, device=devices[0])
     # Scale the initial noise by the standard deviation required by the scheduler
     latents = latents * ddim_scheduler.init_noise_sigma # z_T
 
@@ -520,27 +517,36 @@ def train_step(
     extra_step_kwargs = prepare_extra_step_kwargs(noise_scheduler, generator, args.eta)
 
     with torch.no_grad():
+        # args.guidance_scale: s_g in the paper
+        prompt_embeds = torch.cat([uncond_emb, cond_emb], dim=0) if args.guidance_scale > 1.0 else uncond_emb
+        prompt_embeds = prompt_embeds.to(unet_student.device)
+
         # Generate latents
         latents = sample_until(
             until=int(t_ddim),
             latents=latents,
-            unet=unet_teacher,
+            unet=unet_student,
             scheduler=ddim_scheduler,
-            prompt_embeds=torch.cat([uncond_emb, cond_emb], dim=0) if args.guidance_scale > 1.0 else uncond_emb,
+            prompt_embeds=prompt_embeds,
             guidance_scale=args.guidance_scale,
             extra_step_kwargs=extra_step_kwargs,
         )
 
-    latents = latents.to(unet_student.device)
-    t_ddpm = t_ddpm.to(unet_student.device)
-    c_0 = uncond_emb.to(unet_student.device)
-    c_s = safety_emb.to(unet_student.device)
+        # Stop-grad and send to the second device
+        _latents = latents.to(devices[1])
+        e_0 = unet_teacher(_latents, t_ddpm.to(devices[1]), encoder_hidden_states=uncond_emb).sample
+        e_p = unet_teacher(_latents, t_ddpm.to(devices[1]), encoder_hidden_states=safety_emb).sample
 
-    with torch.no_grad():
-        e_0 = unet_student(latents, t_ddpm, encoder_hidden_states=c_0).sample
-    e_s = unet_student(latents, t_ddpm, encoder_hidden_states=c_s).sample
+        e_0 = e_0.detach().to(devices[0])
+        e_p = e_p.detach().to(devices[0])
 
-    loss = F.mse_loss(e_0.detach(), e_s)
+        # args.concept_scale: s_s in the paper
+        noise_target = e_0 - args.concept_scale * (e_p - e_0)
+
+    noise_pred = unet_student(latents, t_ddpm.to(devices[0]), encoder_hidden_states=safety_emb.to(devices[0])).sample
+
+    loss = F.mse_loss(noise_pred, noise_target)
+    
     return loss
 
 
@@ -647,14 +653,14 @@ def main():
         num_training_steps=args.num_train_steps * args.gradient_accumulation_steps,
     )
 
-    # First device -- unet_student
+    # First device -- unet_student, generator
     # Second device -- unet_teacher, vae, text_encoder
     unet_student = unet_student.to(args.devices[0])
+    gen = torch.Generator(device=devices[0])
 
     unet_teacher = unet_teacher.to(devices[1])
     text_encoder = text_encoder.to(devices[1])
     vae = vae.to(args.devices[1])
-    gen = torch.Generator(device=devices[1])
     if args.seed is not None:
         gen.manual_seed(args.seed)
 
@@ -686,22 +692,9 @@ def main():
 
     for step in progress_bar:
 
-        # Sample a concept to remove
-        if args.concept_method == "composite":
-            # concat all strings separated by commas in removing_concepts
-            removing_concept = ", ".join(args.removing_concepts)
-        elif args.concept_method == "random":
-            # randomly choose a concept to remove
-            removing_concept = random.choice(args.removing_concepts)
-        elif args.concept_method == "iterative":
-            # iteratively choose a concept to remove
-            removing_concept = args.removing_concepts[(step-1) % len(args.removing_concepts)]
-        elif args.concept_method == "sequential":
-            # choose a concept to remove in a continual manner
-            removing_concept = args.removing_concepts[(step-1) // args.num_train_steps]
-
+        removing_concept = random.choice(args.removing_concepts)
         removing_prompt = removing_concept
-        prompt = ", ".join(args.removing_concepts)
+        prompt = removing_prompt
 
         unet_student.train()
 
@@ -755,12 +748,6 @@ def main():
                 lr_scheduler.step()
                 optimizer.zero_grad()
 
-        # Update unet_teacher with EMA
-        if step % args.gradient_accumulation_steps == 0:
-            with torch.no_grad():
-                for param, ema_param in zip(unet_student.parameters(), unet_teacher.parameters()):
-                    ema_param.data.mul_(args.ema_decay).add_(param.data.to(devices[1]), alpha=1 - args.ema_decay)
-
         progress_bar.set_description(f"Training: {train_loss.item():.4f} on c_p: {prompt} - c_s: {removing_concept}")
         if args.use_wandb:
             wandb.log({"train/loss": train_loss.item(), "step": step, "train/lr": lr_scheduler.get_last_lr()[0]})
@@ -770,33 +757,17 @@ def main():
 
         # Validation
         if (step % args.eval_every == 0) and (step >= args.eval_after) and (len(args.validation_prompts) > 0):
-            if args.eval_with in ["teacher", "both"]:
-                validate(
-                    args=args,
-                    vae=vae,
-                    text_encoder=text_encoder,
-                    tokenizer=tokenizer,
-                    unet=unet_teacher,
-                    weight_dtype=vae.dtype,
-                    step=step,
-                    device=devices[1],
-                    prefix="teacher",
-                )
-            if args.eval_with in ["student", "both"]:
-                unet_student.eval()
-                unet_student = unet_student.to(devices[1])
-                validate(
-                    args=args,
-                    vae=vae,
-                    text_encoder=text_encoder,
-                    tokenizer=tokenizer,
-                    unet=unet_student,
-                    weight_dtype=vae.dtype,
-                    step=step,
-                    device=devices[1],
-                    prefix="student",
-                )
-                unet_student = unet_student.to(args.devices[0])
+            validate(
+                args=args,
+                vae=vae,
+                text_encoder=text_encoder,
+                tokenizer=tokenizer,
+                unet=unet_student,
+                weight_dtype=vae.dtype,
+                step=step,
+                device=devices[1],
+                prefix="teacher",
+            )
 
             # Save checkpoint
             if step % args.save_every == 0:
@@ -805,7 +776,7 @@ def main():
                         args=args,
                         text_encoder=text_encoder,
                         vae=vae,
-                        unet=unet_teacher,
+                        unet=unet_student,
                         step=step,
                     )
 
@@ -815,7 +786,7 @@ def main():
             args=args,
             text_encoder=text_encoder,
             vae=vae,
-            unet=unet_teacher,
+            unet=unet_student,
         )
 
 
