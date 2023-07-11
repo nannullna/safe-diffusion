@@ -2,6 +2,8 @@
 
 The official implementation of the paper "Towards Safe Self-Distillation of Internet-Scale Text-to-Image Diffusion Models" (ICML 2023 Workshop on Challenges in Deployable Generative AI)
 
+![Overview of SDD](assets/sdd_1800w_white_border.png)
+
 ## How to Run
 
 ### Installation
