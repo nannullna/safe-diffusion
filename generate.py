@@ -148,7 +148,7 @@ def validate(
 
     all_image_files, all_prompts = [], []
     num_total_iters = math.ceil(len(prompts) / MAX_INFER_BATCH_SIZE)
-    tbar = trange(len(prompts), desc=f"Prompt: {prompts[0]}", total=num_total_iters)
+    tbar = trange(len(prompts), desc=f"Prompt: {prompts[0]}")
     index = 0
     prev_idx = -1
 
