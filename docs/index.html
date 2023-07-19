@@ -13,7 +13,6 @@
   <meta property="og:image:width" content="1200"/>
   <meta property="og:image:height" content="630"/>
 
-
   <meta name="twitter:title" content="TWITTER BANNER TITLE META TAG">
   <meta name="twitter:description" content="TWITTER BANNER DESCRIPTION META TAG">
   <!-- Path to banner image, should be in the path listed below. Optimal dimenssions are 1200X600-->
@@ -22,7 +21,6 @@
   <!-- Keywords for your paper to be indexed by-->
   <meta name="keywords" content="KEYWORDS SHOULD BE PLACED HERE">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
 
   <title>Safe self-Diffusion Distillation</title>
   <link rel="icon" type="image/x-icon" href="static/images/favicon.ico">
@@ -43,6 +41,7 @@
   <script src="static/js/bulma-carousel.min.js"></script>
   <script src="static/js/bulma-slider.min.js"></script>
   <script src="static/js/index.js"></script>
+
 </head>
 <body>
 
@@ -78,14 +77,14 @@
 
             <div class="column has-text-centered">
               <div class="publication-links">
-                    <!-- Arxiv PDF link -->
+                    <!-- Openreview link -->
                 <span class="link-block">
-                  <a href="https://arxiv.org/pdf/<ARXIV PAPER ID>.pdf" target="_blank"
+                  <a href="https://openreview.net/forum?id=6zALFeqxY0" target="_blank"
                   class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                     <i class="fas fa-file-pdf"></i>
                   </span>
-                  <span>Paper</span>
+                  <span>OpenReview</span>
                   </a>
                 </span>
 
@@ -114,7 +113,7 @@
 
                 <!-- ArXiv abstract Link -->
                 <span class="link-block">
-                  <a href="https://arxiv.org/abs/<ARXIV PAPER ID>" target="_blank"
+                  <a href="https://arxiv.org/abs/2307.05977" target="_blank"
                   class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
                     <i class="ai ai-arxiv"></i>
@@ -137,11 +136,11 @@
     <div class="hero-body">
       <video poster="" id="tree" autoplay controls muted loop height="100%">
         <!-- Your video here -->
-        <source src="static/videos/banner_video.mp4"
+        <source src="static/videos/main.mp4"
         type="video/mp4">
       </video>
       <h2 class="subtitle has-text-centered">
-        Progression of removal on the generated image with the same initial latent code. 
+        Artist concept removal on the generated images with the same initial latent code. 
       </h2>
     </div>
   </div>
@@ -196,49 +195,237 @@
 <!-- End concept figure -->
 
 
+<section class="hero is-small">
+  <div class="hero-body">
+    <div class="container">
+      <h2 class="title is-3">Quantitative Results</h2>
+      <!-- Table of 7 by 5 containing all zeros -->
+      <h3 class="title is-4">NSFW Removal</h3>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <div class="table-container">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th>Prompt</th>
+                  <th>"body"</th>
+                  <th colspan="3">COCO-30k</th>
+                </tr>
+                <tr>
+                  <th>Method</th>
+                  <th>% Nude</th>
+                  <th>FID</th>
+                  <th>LPIPS</th>
+                  <th>CLIP</th>
+                </tr>
+              </thead>
+              <!-- First row -->
+              <tr>
+                <th>SD</th>
+                <td>74.18</td>
+                <td>21.348</td>
+                <td>N/A</td>
+                <td>0.2771</td>
+              </tr>
+              <!-- Second row -->
+              <tr>
+                <th>SD+NEG</th>
+                <td>20.44</td>
+                <td>14.278</td>
+                <td>0.1954</td>
+                <td>0.2706</td>
+              </tr>
+              <!-- Third row -->
+              <tr>
+                <th>SLD-medium</th>
+                <td>70.02</td>
+                <td>17.201</td>
+                <td>0.1015</td>
+                <td>0.2689</td>
+              </tr>
+              <!-- Fourth row -->
+              <tr>
+                <th>SLD-max</th>
+                <td>4.30</td>
+                <td>13.634</td>
+                <td>0.1574</td>
+                <td>0.2709</td>
+              </tr>
+              <!-- Fifth row -->
+              <tr>
+                <th>SEGA</th>
+                <td>72.04</td>
+                <td> - </td>
+                <td> - </td>
+                <td> - </td>
+              </tr>
+              <!-- Sixth row -->
+              <tr>
+                <th>ESD-u-3</th>
+                <td>43.30</td>
+                <td> - </td>
+                <td> - </td>
+                <td> - </td>
+              </tr>
+              <!-- Sixth row -->
+              <tr>
+                <th>ESD-x-3</th>
+                <td>14.32</td>
+                <td>13.808</td>
+                <td>0.1587</td>
+                <td>0.2690</td>
+              </tr>
+              <!-- Sixth row -->
+              <tr>
+                <th>SDD (ours)</th>
+                <td><b>1.68</b></td>
+                <td>15.423</td>
+                <td>0.1797</td>
+                <td>0.2673</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <h3 class="title is-4">I2P Multi-Concept Removal</h3>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <div class="table-container">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th>Prompt</th>
+                  <th>"body"</th>
+                  <th>"I2P"</th>
+                  <th colspan="3">COCO-30k</th>
+                </tr>
+                <tr>
+                  <th>Method</th>
+                  <th>% Nude</th>
+                  <th>% Harm</th>
+                  <th>FID</th>
+                  <th>LPIPS</th>
+                  <th>CLIP</th>
+                </tr>
+              </thead>
+              <!-- First row -->
+              <tr>
+                <th>SD</th>
+                <td>74.18</td>
+                <td>24.42</td>
+                <td>21.348</td>
+                <td>N/A</td>
+                <td>0.2771</td>
+              </tr>
+              <!-- Second row -->
+              <tr>
+                <th>SD+NEG</th>
+                <td>63.78</td>
+                <td>9.51</td>
+                <td>18.021</td>
+                <td>0.1925</td>
+                <td>0.2659</td>
+              </tr>
+              <!-- Third row -->
+              <tr>
+                <th>SLD-medium</th>
+                <td>74.16</td>
+                <td>7.42</td>
+                <td>14.794</td>
+                <td>0.4216</td>
+                <td>0.2720</td>
+              </tr>
+              <!-- Fourth row -->
+              <tr>
+                <th>SLD-max</th>
+                <td>56.78</td>
+                <td>5.19</td>
+                <td>21.729</td>
+                <td>0.4377</td>
+                <td>0.2572</td>
+              </tr>
+              <!-- Fifth row -->
+              <tr>
+                <th>SEGA</th>
+                <td>74.10</td>
+                <td>16.84</td>
+                <td> - </td>
+                <td> - </td>
+                <td> - </td>
+              </tr>
+              <!-- Sixth row -->
+              <tr>
+                <th>ESD-x-3</th>
+                <td>47.38</td>
+                <td>13.04</td>
+                <td>16.411</td>
+                <td>0.2036</td>
+                <td>0.2631</td>
+              </tr>
+              <!-- Sixth row -->
+              <tr>
+                <th>SDD (ours)</th>
+                <td><b>12.62</b></td>
+                <td><b>5.03</b></td>
+                <td>15.142</td>
+                <td>0.2443</td>
+                <td>0.2560</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+
+
 <!-- Image carousel -->
 <section class="hero is-small">
   <div class="hero-body">
     <div class="container">
       <h2 class="title is-3">Artist Concept Removal</h2>
       <div id="results-carousel" class="carousel results-carousel">
-       <div class="item">
-        <!-- Your image here -->
-        <img src="static/imgs/artists/thomas_kinkade_grid.gif" alt="Artist removal performance of Thomas Kinkade"/>
-        <h2 class="subtitle has-text-centered">
-          Thomas Kinkade
-        </h2>
+        <div class="item item-video1">
+          <video poster="" id="video1" autoplay controls muted loop height="100%">
+            <!-- Your video file here -->
+            <source src="static/videos/gogh_grid.mp4"
+            type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-video2">
+          <video poster="" id="video2" autoplay controls muted loop height="100%">
+            <!-- Your video file here -->
+            <source src="static/videos/picasso_grid.mp4"
+            type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-video3">
+          <video poster="" id="video3" autoplay controls muted loop height="100%">\
+            <!-- Your video file here -->
+            <source src="static/videos/kinkade_grid.mp4"
+            type="video/mp4">
+          </video>
+        </div>
+        <div class="item item-video4">
+          <video poster="" id="video4" autoplay controls muted loop height="100%">\
+            <!-- Your video file here -->
+            <source src="static/videos/eng_grid.mp4"
+            type="video/mp4">
+          </video>
       </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="static/imgs/artists/pablo_picasso_grid.gif" alt="Artist removal performance of Pablo Picasso"/>
-        <h2 class="subtitle has-text-centered">
-          Pablo Picasso
-        </h2>
-      </div>
-      <div class="item">
-        <!-- Your image here -->
-        <img src="static/imgs/artists/van_gogh_grid.gif" alt="Artist removal performance of Vincent van Gogh"/>
-        <h2 class="subtitle has-text-centered">
-          Vincent van Gogh
-       </h2>
-     </div>
-     <div class="item">
-      <!-- Your image here -->
-      <img src="static/imgs/artists/kilian_eng_grid.gif" alt="Artist removal performance of Kilian Eng"/>
-      <h2 class="subtitle has-text-centered">
-        Kilian Eng
-      </h2>
+      <div class="item item-video5">
+        <video poster="" id="video5" autoplay controls muted loop height="100%">\
+          <!-- Your video file here -->
+          <source src="static/videos/warhol_grid.mp4"
+          type="video/mp4">
+        </video>
     </div>
-    <div class="item">
-      <!-- Your image here -->
-      <img src="static/imgs/artists/andy_warhol_grid.gif" alt="Artist removal performance of Andy Warhol"/>
-      <h2 class="subtitle has-text-centered">
-        Andy Warhol
-      </h2>
   </div>
-</div>
-</div>
 </section>
 <!-- End image carousel -->
 
