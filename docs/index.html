@@ -449,31 +449,31 @@
   <div class="container is-max-desktop content">
     <h3 class="title is-4">Pseudo-code</h3>
     <pre><code class="language-python">def run_sdd(
-unet: UNet2DConditionModel, scheduler: DDIMScheduler, text_encoder: CLIPTextModel,
-concepts: List[str], n_iters: int=1500, m: float=0.999, s_g: float=3.0,
-):
-unet_ema = deepcopy(unet)
-c_0, c_s = text_encoder(""), text_encoder(", ".join(concepts))
-for _ in range(n_iters):
-  c_p = text_encoder(concepts[i % len(concepts)]) # Iterate over concepts
-  until = torch.randint((1,), 0, scheduler.total_steps-1)
-  z_t = torch.randn((1, 4, 64, 64), 0, 1) # Initial Gaussian noise z_T
-  with torch.no_grad():
-    for i, t in enumerate(scheduler.timesteps):
-      e_0, e_p = unet_ema(z_t, t, c_0), unet_ema(z_t, t, c_p)
-      e_tilde = e_0 + s_g * (e_p - e_0) # Sample latents z_t from the EMA model
-      z_t = scheduler(z_t, e_tilde, t)  # for T - t steps according to CFG
-      if i == until:
-        break
-  e_0, e_s = unet(z_t, t, c_0), unet(z_t, t, c_s)
-  loss = ((e_0.detach() - e_s) ** 2).mean() # L2-norm between two noise estimates
-  loss.backward()
-  optimizer.step()
-  optimizer.zero_grad()
-  with torch.no_grad():
-    for p, q in zip(unet_ema.parameters(), unet.parameters()):
-      p = m * p + (1 - m) * q # EMA update
-return unet_ema
+  unet: UNet2DConditionModel, scheduler: DDIMScheduler, text_encoder: CLIPTextModel,
+  concepts: List[str], n_iters: int=1500, m: float=0.999, s_g: float=3.0,
+) -> UNet2DConditionModel:
+  unet_ema = deepcopy(unet)
+  c_0, c_s = text_encoder(""), text_encoder(", ".join(concepts))
+  for _ in range(n_iters):
+    c_p = text_encoder(concepts[i % len(concepts)]) # Iterate over concepts
+    until = torch.randint((1,), 0, scheduler.total_steps-1)
+    z_t = torch.randn((1, 4, 64, 64), 0, 1) # Initial Gaussian noise z_T
+    with torch.no_grad():
+      for i, t in enumerate(scheduler.timesteps):
+        e_0, e_p = unet_ema(z_t, t, c_0), unet_ema(z_t, t, c_p)
+        e_tilde = e_0 + s_g * (e_p - e_0) # Sample latents z_t from the EMA model
+        z_t = scheduler(z_t, e_tilde, t)  # for T - t steps according to CFG
+        if i == until:
+          break
+    e_0, e_s = unet(z_t, t, c_0), unet(z_t, t, c_s)
+    loss = ((e_0.detach() - e_s) ** 2).mean() # L2-norm between two noise estimates
+    loss.backward()
+    optimizer.step()
+    optimizer.zero_grad()
+    with torch.no_grad():
+      for p, q in zip(unet_ema.parameters(), unet.parameters()):
+        p = m * p + (1 - m) * q # EMA update
+  return unet_ema
     </code></pre>
   </div>
 </div>
